@@ -2,9 +2,9 @@ pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
 
-gs = "menu" -- menu, game, pause
+gs = "game" -- menu, game, pause
 t = 0
-all_actors = {}
+actors = {}
 player=nil
 
 function _init()
@@ -12,19 +12,32 @@ function _init()
 end
 
 function _update()
- update_actor(player)
+ for a in all(actors) do
+  update_actor(a)
+ end
 end
 
 function _draw()
- draw_actor(player)
+ if gs == "menu" then
+  menu_draw()
+ else
+  game_draw()
+ end
 end
 
-function new_actor()
+function menu_draw()
+
+end
+
+function game_draw()
+ for a in all(actors) do
+  draw_actor(a)
+ end
 end
 
 function new_actor()
  a={x=0, y=0, dx=0, dy=0, spr=0, spd=1, s="idle", c=false}
- add(all_actors, a)
+ add(actors, a)
  return a
 end
 
