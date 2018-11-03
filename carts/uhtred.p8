@@ -13,11 +13,19 @@ end
 
 function _update()
  for a in all(actors) do
+  a.dy = 0
+  a.dx = 0
+ end
+
+ handle_input()
+
+ for a in all(actors) do
   update_actor(a)
  end
 end
 
 function _draw()
+ cls()
  if gs == "menu" then
   menu_draw()
  else
@@ -50,7 +58,40 @@ function draw_actor(a)
  spr(a.spr, a.x, a.y)
 end
 
-
+function handle_input()
+ if gs=="game" then
+  if btn(0) then
+   player.dx = -1
+  end
+  if btn(1) then
+   player.dx = 1
+  end
+  if btn(2) then
+   player.dy = -1
+  end
+  if btn(3) then
+   player.dy = 1
+  end
+  if btn(4) then
+  end
+  if btn(5) then
+  end
+ else
+  if btnp(0) then
+  end
+  if btnp(1) then
+  end
+  if btnp(2) then
+  end
+  if btnp(3) then
+  end
+  if btnp(4) then
+  end
+  if btnp(5) then
+  end
+ end
+ 
+end
 
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
