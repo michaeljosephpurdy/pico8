@@ -2,7 +2,8 @@ pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
 
-gs = "game" -- menu, game, pause
+gs = "menu" -- menu, game, pause
+menu_choice = 0
 t = 0
 actors = {}
 player=nil
@@ -16,9 +17,7 @@ function _update()
   a.dy = 0
   a.dx = 0
  end
-
  handle_input()
-
  for a in all(actors) do
   update_actor(a)
  end
@@ -34,7 +33,7 @@ function _draw()
 end
 
 function menu_draw()
-
+ print("press x - menu_choice" .. menu_choice)
 end
 
 function game_draw()
@@ -82,10 +81,15 @@ function handle_input()
   if btnp(1) then
   end
   if btnp(2) then
+   menu_choice -= 1
   end
   if btnp(3) then
+   menu_choice += 1
   end
   if btnp(4) then
+   if gs == "menu" then
+    gs = "game"
+   end
   end
   if btnp(5) then
   end
