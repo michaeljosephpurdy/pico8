@@ -2,29 +2,33 @@ pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
 
-game_state = "menu" -- menu, game, pause
+_GAME, _MENU, _PAUSE = 1, 2, 3
+_IDLE, _MOVING, _ATTACKING = 1, 2, 3
+
+game_state = _MENU
 menu_choice = 0
 actors = {}
 player = nil
+debug_msg = ""
 
 function _init()
  player = new_actor(0, 40, 40)
- mob = new_actor(1)
+ mob = new_actor(1, 20, 20)
 end
 
 function _update()
+ debug_msg = ""
  handle_input()
- for a in all(actors) do
-  update_actor(a)
- end
+ foreach(actors, update_actor)
 end
 
 function _draw()
  cls()
- if game_state == "menu" then
+ print(debug_msg)
+ if game_state == _MENU then
   menu_draw()
  else
-  game_draw()
+  foreach(actors, draw_actor)
  end
 end
 
@@ -32,27 +36,12 @@ function menu_draw()
  print("press z to start")
 end
 
-function game_draw()
- for a in all(actors) do
-  spr(a.spr, a.x, a.y)
- end
-end
-
-function new_actor(bs, x, y, hp)
- a={x=x or 0, y=y or 0,
-    dx=0, dy=0, dir=0,
-    hp=hp or 0, speed=2,
-    base_sprite=bs, sprite=bs*4,
-    state="idle",
-    attack_timer=0, attack_cooldown=20
-    }
- add(actors, a)
- return a
+function draw_actor(a)
+ spr(a.sprite, a.x, a.y)
 end
 
 function update_actor(a)
- if a.state == "moving" then
-  a.sprite = a.base_sprite * 4
+ if a.state == _MOVING then
   if a.dx == 1 then
    a.dir = 2
   end
@@ -65,49 +54,70 @@ function update_actor(a)
   if a.dy == 1 then
    a.dir = 1
   end
- 
-  a.sprite = a.sprite + a.dir
+  a.sprite = a.base_sprite * 4 + a.dir
   a.x += (a.dx * a.speed)
   a.y += (a.dy * a.speed)
- elseif a.state == "attacking" then
-  a.attack_timer += 1
+ elseif a.state == _ATTACKING then
   if a.attack_timer <= a.attack_cooldown then
-   print("stab")
+   a.attack_timer += 1
+   attack = new_actor(240, a.x, a.y, 240, 0, 10)
+   attack.dir = a.dir 
   else
    a.attack_timer = 0
-   print("nostab")
+   a.state=_IDLE
+   debug_msg = "nostab"
   end
- elseif a.state == "idle" then
+ elseif a.state == _IDLE then
   a.dx = 0
   a.dy = 0
  end
 end
 
+function new_actor(bs, x, y, sprite, hp, dmg)
+ a={x=x or 0,
+    y=y or 0,
+    dx=0,
+    dy=0,
+    dir=0,
+    hp=hp or 0,
+    dmg=dmg or 0,
+    speed=2,
+    base_sprite=bs or 0,
+    sprite=sprite or (bs * 4),
+    state=_IDLE,
+    attack_timer=0,
+    attack_cooldown=10,
+    attacks={}}
+ add(actors, a)
+ return a
+end
+
 function handle_input()
- if game_state=="game" then
-  player.state = "idle"
+ if game_state==_GAME then
+  if player.state != _ATTACKING then
   if btn(0) then
-   player.state = "moving"
+   player.state = _MOVING
    player.dx = -1
   elseif btn(1) then
-   player.state = "moving"
+   player.state = _MOVING
    player.dx = 1
   else
    player.dx = 0
   end
 
   if btn(2) then
-   player.state = "moving"
+   player.state = _MOVING
    player.dy = -1
   elseif btn(3) then
-   player.state = "moving"
+   player.state = _MOVING
    player.dy = 1
   else
    player.dy = 0
   end
+  end
 
-  if btn(4) then
-   player.state = "attacking"
+  if btnp(4) then
+   player.state = _ATTACKING
   end
   if btn(5) then
   end
@@ -124,9 +134,7 @@ function handle_input()
    menu_choice += 1
   end
   if btnp(4) then
-   if game_state == "menu" then
-    game_state = "game"
-   end
+   game_state=_GAME
   end
   if btnp(5) then
   end
